@@ -1,24 +1,14 @@
 import express from 'express';
 import dotenv from 'dotenv';
-
-import { chatController } from './controllers/chat.controller';
-
-const app = express();
-app.use(express.json());
-const PORT = 3000;
+import router from './routes';
 
 dotenv.config();
 
-app.get('/', (req, res) => {
-  res.send('Hello, World!');
-});
+const app = express();
+app.use(express.json());
+app.use(router);
 
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from the API!' });
-});
-
-// api endpoint to communicate with the OpenAI API
-app.post('/api/chat', chatController.sendMessage);
+const PORT = 3000;
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
