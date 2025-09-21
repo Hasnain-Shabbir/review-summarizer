@@ -21,7 +21,7 @@ type Message = {
 
 const ChatBot = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const formRef = useRef<HTMLFormElement | null>(null);
+  const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const [isBotTyping, setIsBotTyping] = useState(false);
   const { register, handleSubmit, reset, formState } = useForm<FormData>();
   const conversationId = useRef(crypto.randomUUID());
@@ -29,7 +29,9 @@ const ChatBot = () => {
   const onSubmit = async ({ prompt }: FormData) => {
     setMessages((prev) => [...prev, { content: prompt, role: 'user' }]);
     setIsBotTyping(true);
-    reset();
+    reset({
+      prompt: '',
+    });
 
     const { data } = await axios.post<ChatResponse>('/api/chat', {
       prompt: prompt,
@@ -56,20 +58,21 @@ const ChatBot = () => {
   };
 
   useEffect(() => {
-    formRef.current?.scrollIntoView({ behavior: 'smooth' });
+    lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   return (
-    <div>
-      <div className="flex flex-col gap-3 mb-8">
+    <div className="flex flex-col h-full">
+      <div className="flex flex-col gap-3 mb-8 flex-1 overflow-y-auto">
         {messages.map((message, index) => (
-          <p
+          <div
             onCopy={onCopyMessage}
+            ref={index === messages.length - 1 ? lastMessageRef : null}
             key={index}
             className={`px-3 py-1 rounded-xl ${message.role === 'user' ? 'bg-blue-600 text-white self-end' : 'bg-gray-100 self-start text-black'}`}
           >
             <ReactMarkdown>{message.content}</ReactMarkdown>
-          </p>
+          </div>
         ))}
         {isBotTyping && (
           <div className="flex gap-1 px-3 py-3 bg-gray-200 rounded-lg self-start">
@@ -81,7 +84,6 @@ const ChatBot = () => {
       </div>
 
       <form
-        ref={formRef}
         onSubmit={handleSubmit(onSubmit)}
         onKeyDown={onKeyDown}
         className="gap-2 flex flex-col items-end border-2 border-gray-300 p-4 rounded-3xl"
@@ -91,6 +93,7 @@ const ChatBot = () => {
             required: true,
             validate: (value) => value.trim().length > 0,
           })}
+          autoFocus
           className="border-0 focus:outline-0 resize-none w-full"
           placeholder="Ask anything"
           maxLength={1000}
