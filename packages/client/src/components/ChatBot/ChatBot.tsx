@@ -1,6 +1,9 @@
-import { Button } from '../ui/button';
 import { FaArrowUp } from 'react-icons/fa';
 import { useForm } from 'react-hook-form';
+import axios from 'axios';
+
+import { Button } from '../ui/button';
+import { useRef } from 'react';
 
 type FormData = {
   prompt: string;
@@ -8,9 +11,17 @@ type FormData = {
 
 const ChatBot = () => {
   const { register, handleSubmit, reset, formState } = useForm<FormData>();
+  const conversationId = useRef(crypto.randomUUID());
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async ({ prompt }: FormData) => {
     reset();
+
+    const { data } = await axios.post('/api/chat', {
+      prompt: prompt,
+      conversationId: conversationId.current,
+    });
+
+    console.log(data);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
