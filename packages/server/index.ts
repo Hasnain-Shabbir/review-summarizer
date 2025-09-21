@@ -2,6 +2,7 @@ import express, { type Request, type Response } from 'express';
 import dotenv from 'dotenv';
 import OpenAI from 'openai';
 import z from 'zod';
+import { conversationRepository } from './repositories/conversation.respository';
 
 const app = express();
 app.use(express.json());
@@ -20,8 +21,6 @@ app.get('/', (req, res) => {
 app.get('/api/hello', (req, res) => {
   res.json({ message: 'Hello from the API!' });
 });
-
-const conversations = new Map<string, string>();
 
 // Always apply min and max to secure the token usage.
 const chatSchema = z.object({
@@ -49,10 +48,11 @@ app.post('/api/chat', async (req: Request, res: Response) => {
       input: prompt,
       temperature: 0.2, // we need accurate responses, and for chat we can go with .2
       max_output_tokens: 100,
-      previous_response_id: conversations.get(conversationId),
+      previous_response_id:
+        conversationRepository.getLastResponseId(conversationId),
     });
 
-    conversations.set(conversationId, response.id);
+    conversationRepository.setLastResponseId(conversationId, response.id);
 
     res.json({
       message: response.output_text,
