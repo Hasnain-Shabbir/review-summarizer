@@ -32,7 +32,7 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
           onCopy={onCopyMessage}
           ref={index === messages.length - 1 ? lastMessageRef : null}
           key={index}
-          className={`px-3 py-1 rounded-xl ${message.role === 'user' ? 'bg-blue-600 text-white self-end' : 'bg-gray-100 self-start text-black'}`}
+          className={`px-3 py-1 max-w-md rounded-xl ${message.role === 'user' ? 'bg-blue-600 text-white self-end' : 'bg-gray-100 self-start text-black'}`}
         >
           <ReactMarkdown>{message.content}</ReactMarkdown>
         </div>
