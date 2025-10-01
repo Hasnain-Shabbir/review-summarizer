@@ -9,6 +9,12 @@ export const reviewService = {
   },
 
   async summarizeReviews(productId: number): Promise<string> {
+    const existingSummary = await reviewRepository.getReviewSummary(productId);
+
+    if (existingSummary && existingSummary.expiresAt > new Date()) {
+      return existingSummary.content;
+    }
+
     const reviews = await reviewRepository.getReviews(productId, 10);
     const joinedReviews = reviews.map((review) => review.content).join('\n\n');
 
@@ -18,13 +24,15 @@ export const reviewService = {
       return 'No reviews available for this product.';
     }
 
-    const response = await llmClient.generateText({
+    const { text: summary } = await llmClient.generateText({
       model: 'gpt-4o-mini',
       prompt,
       temperature: 0.2,
       maxTokens: 500,
     });
 
-    return response.text;
+    await reviewRepository.storeReviewSummary(productId, summary);
+
+    return summary;
   },
 };
