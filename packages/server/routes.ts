@@ -15,5 +15,9 @@ router.get('/api/hello', (req, res) => {
 // api endpoint to communicate with the OpenAI API
 router.post('/api/chat', chatController.sendMessage);
 router.get('/api/products/:id/reviews', reviewController.getReviews);
+router.get(
+  '/api/products/:id/reviews/summarize',
+  reviewController.summarizeReviews
+);
 
 export default router;

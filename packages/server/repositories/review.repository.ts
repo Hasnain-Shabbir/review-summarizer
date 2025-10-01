@@ -1,7 +1,7 @@
 import { PrismaClient, type Review } from '../generated/prisma';
 
 export const reviewRepository = {
-  async getReviews(productId: number): Promise<Review[]> {
+  async getReviews(productId: number, limit?: number): Promise<Review[]> {
     const prisma = new PrismaClient();
 
     const reviews = await prisma.review.findMany({
@@ -9,6 +9,7 @@ export const reviewRepository = {
         productId,
       },
       orderBy: { createdAt: 'desc' },
+      take: limit,
     });
 
     return reviews;
